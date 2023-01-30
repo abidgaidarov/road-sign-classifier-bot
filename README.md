@@ -3,7 +3,7 @@
 Please open the bot via [link](https://t.me/road_sign_classifier_bot).
 
 It is trained on the following classes:
-| number | category                         | descriptive                                                        |
+| #      | category                         | description                                                        |
 | ------ | -------------------------------- | ------------------------------------------------------------------ |
 | 1      | Dangerous warning                | Right bend                                                         |
 | 2      | Dangerous warning                | Left bend                                                          |

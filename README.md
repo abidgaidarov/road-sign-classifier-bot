@@ -1,6 +1,6 @@
 ## SignVision Bot
 
-This Telegram bot, with its state-of-the-art AI technology, helps you detect and classify road signs in your photos with ease. Simply send it a picture, and it will recognize and categorize the signs in a matter of seconds. Get instant insights and knowledge on the road signs around you with just a tap!
+My Telegram bot, with its state-of-the-art AI technology, helps you detect and classify road signs in your photos with ease. Simply send it a picture, and it will recognize and categorize the signs in a matter of seconds. Get instant insights and knowledge on the road signs around you with just a tap!
 
 Please open the bot via [link](https://t.me/road_sign_classifier_bot) and press `/start`.
 

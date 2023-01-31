@@ -2,7 +2,7 @@
 import aiogram
 import aiogram.utils
 import asyncio
-from aiogram.types import ContentType, Message
+from aiogram.types import ContentType, Message, ParseMode
 from aiogram.dispatcher.filters import Command
 from aiogram import Bot, executor, Dispatcher, types
 
@@ -68,8 +68,7 @@ model2.eval()
 
 # Load the dataset with classes
 model2_df = pd.read_excel('classes_description.xlsx')
-model2_df['class'] = model2_df['class'].astype('int')
-
+model2_df['class'] = pd.Series(model2_df['class']).astype('int')
 
 # Function to classify iamges
 def classify_photo(cropped_photo_path):
@@ -87,12 +86,12 @@ def classify_photo(cropped_photo_path):
 # Function to extract description
 def extract_descriptive(predicted_class):
     row = model2_df[model2_df['class']==predicted_class]
+    print(row)
     return f"""CATEGORY: {row['category'].item()}, \nDESCRIPTION: {row['descriptive'].item()}"""
 
 # Start command handler
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
-    full_name = message.from_user.full_name
     user_name = message.from_user.username
     await message.reply(f"Hello, {user_name}! 🤖 I'm SignVision, your personal road sign detection expert. 🦾 Powered by AI and computer vision technologies, I can help you identify the road signs in your photos with just a snap. Let's get started! 🚦")
 
@@ -127,6 +126,7 @@ async def classify(msg: types.Message):
     model1_crop = crop_photo(img)
 
     if len(model1_crop) == 0:
+        await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete1.message_id)
         await msg.answer('I cannot detect a sign. 🧐 Please try sending another photo.')
     elif len(model1_crop) >= 1:
         for n in model1_crop:
@@ -144,11 +144,13 @@ async def classify(msg: types.Message):
             except:
                 None
 
-            print(predicted_class_probability)
+            print(f'predicted_class_probability - {predicted_class_probability}')
+            print('\n')
             if predicted_class_probability > 0.7: # confidence level for classification
                 await msg.answer_photo(photo)
                 await msg.answer(final_description)
     else:
+        await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete1.message_id)
         await msg.answer('I am not sure what sign it is. 🤗 Please try sending another photo.')
     
     url = 'https://memepedia.ru/wp-content/uploads/2020/09/b2b7c451cbddc634ecc0dc37031fb4d6.jpg'
@@ -161,3 +163,4 @@ async def classify(msg: types.Message):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=False)
+

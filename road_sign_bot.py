@@ -138,7 +138,11 @@ async def classify(msg: types.Message):
         await asyncio.sleep(1.5)
         await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete2.message_id)
     elif len(model1_crop) >= 1:
+        
+        crops_left = len(model1_crop)
+        
         for n in model1_crop:
+
             img_name = secrets.token_hex(8)
             n.save(f'static/{img_name}.png', format='PNG')
             photo=open(f'static/{img_name}.png', 'rb')
@@ -155,18 +159,19 @@ async def classify(msg: types.Message):
 
             print(f'predicted_class_probability - {predicted_class_probability}')
             print('\n')
-            if predicted_class_probability > 0.6: # confidence level for classification
+
+            if predicted_class_probability >= 0.65: # confidence level for classification
+                crops_left -= 1
                 await msg.answer_photo(photo)
                 await msg.answer(final_description)
-    else:
-        await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete1.message_id)
-        await msg.answer('I am not sure what sign it is. 🤗 Please try sending another photo.')
+            elif predicted_class_probability < 0.6 and crops_left == 1:
+                await msg.answer('I am not sure what sign it is. 🤗 Please try sending another photo.')
+                
+                msg_to_delete2 = await msg.answer_photo(photo=open('temp.jpg', 'rb'))
+                await asyncio.sleep(1.5)
+                await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete2.message_id)
+                
 
-        msg_to_delete2 = await msg.answer_photo(photo=open('temp.jpg', 'rb'))
-        await asyncio.sleep(1.5)
-        await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete2.message_id)
-
-print(cv2.__version__)
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=False)
 

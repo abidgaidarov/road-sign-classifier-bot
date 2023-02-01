@@ -106,6 +106,11 @@ async def delete_message(chat_id, message_id):
     # Delete the message with the specified ID
     await bot.delete_message(chat_id=chat_id, message_id=message_id)
 
+url = 'https://memepedia.ru/wp-content/uploads/2020/09/b2b7c451cbddc634ecc0dc37031fb4d6.jpg'
+response = requests.get(url)
+with open('temp.jpg', 'wb') as f:
+    f.write(response.content)
+
 # Sent photo handler    
 @dp.message_handler(content_types=['photo'])
 async def classify(msg: types.Message):
@@ -128,6 +133,10 @@ async def classify(msg: types.Message):
     if len(model1_crop) == 0:
         await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete1.message_id)
         await msg.answer('I cannot detect a sign. 🧐 Please try sending another photo.')
+
+        msg_to_delete2 = await msg.answer_photo(photo=open('temp.jpg', 'rb'))
+        await asyncio.sleep(1.5)
+        await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete2.message_id)
     elif len(model1_crop) >= 1:
         for n in model1_crop:
             img_name = secrets.token_hex(8)
@@ -146,21 +155,18 @@ async def classify(msg: types.Message):
 
             print(f'predicted_class_probability - {predicted_class_probability}')
             print('\n')
-            if predicted_class_probability > 0.7: # confidence level for classification
+            if predicted_class_probability > 0.6: # confidence level for classification
                 await msg.answer_photo(photo)
                 await msg.answer(final_description)
     else:
         await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete1.message_id)
         await msg.answer('I am not sure what sign it is. 🤗 Please try sending another photo.')
-    
-    url = 'https://memepedia.ru/wp-content/uploads/2020/09/b2b7c451cbddc634ecc0dc37031fb4d6.jpg'
-    response = requests.get(url)
-    with open('temp.jpg', 'wb') as f:
-        f.write(response.content)
-    msg_to_delete2 = await msg.answer_photo(photo=open('temp.jpg', 'rb'))
-    await asyncio.sleep(1.5)
-    await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete2.message_id)
 
+        msg_to_delete2 = await msg.answer_photo(photo=open('temp.jpg', 'rb'))
+        await asyncio.sleep(1.5)
+        await delete_message(chat_id=msg.chat.id, message_id=msg_to_delete2.message_id)
+
+print(cv2.__version__)
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=False)
 
